@@ -357,7 +357,7 @@ async function download_pdf() {
 
         const img_height = (canvas.height * img_width)/canvas.width;
 
-        let height_left = img_heightl;
+        let height_left = img_height;
 
         let position = 10
 

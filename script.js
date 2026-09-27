@@ -336,46 +336,70 @@ async function download_pdf() {
     download_elements()
     try {
 
-        const report = document.getElementById('medical_report');
+        const report = document.getElementById("medical_report");
 
+        // Capture the complete report
         const canvas = await html2canvas(report, {
-            scale: 2
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff"
         });
-
-        const img_data = canvas.toDataURL("image/png");
 
         const { jsPDF } = window.jspdf;
 
+        // Create A4 PDF
         const pdf = new jsPDF("p", "mm", "a4");
 
-        const pdf_width = 190;
+        const pdfWidth = 190;
+        const pdfHeight = 277;
 
-        const pdf_height =
-            (canvas.height * pdf_width) / canvas.width;
+        // Calculate image dimensions
+        const imgWidth = pdfWidth;
+        const imgHeight =
+            (canvas.height * imgWidth) / canvas.width;
 
-        const img_width = pdf_width;
+        let heightLeft = imgHeight;
+        let position = 10;
 
-        const img_height = (canvas.height * img_width)/canvas.width;
-
-        let height_left = img_height;
-
-        let position = 10
-
+        // Add first page
         pdf.addImage(
-            img_data,
+            canvas.toDataURL("image/png"),
             "PNG",
             10,
-            10,
-            pdf_width,
-            pdf_height
+            position,
+            imgWidth,
+            imgHeight
         );
 
-        pdf.save("MedicalReport.pdf");
+        heightLeft -= pdfHeight;
+
+        // Add remaining pages
+        while (heightLeft > 0) {
+
+            position = heightLeft - imgHeight + 10;
+
+            pdf.addPage();
+
+            pdf.addImage(
+                canvas.toDataURL("image/png"),
+                "PNG",
+                10,
+                position,
+                imgWidth,
+                imgHeight
+            );
+
+            heightLeft -= pdfHeight;
+        }
+
+        // Download
+        pdf.save("Hospital_Medical_Report.pdf");
 
     } catch (error) {
 
-        console.error(error);
-        alert("Unable to generate PDF. Please check the console.");
+        console.error("PDF Error:", error);
+
+        alert("PDF could not be generated. Please check the console.");
 
     }
 }
